@@ -3,12 +3,15 @@
     <h1 class="subtitle">{{ msg }}</h1>
     <div class="container">
       <a class="btnUploadFile" href="javascript:void(0)" @click="mostrarUpload = !mostrarUpload">
-        Subir archivo
+        Leer nuevo archivo de logs (formato json)
       </a>
-      <div v-if="mostrarUpload" class="cont-upload-file">
-        <UploadFile dataArray="jsonsource"></UploadFile>
-        <span class="close-upload" @click="mostrarUpload = !mostrarUpload"></span>
-      </div>
+      <Transition>
+        <div v-show="mostrarUpload" class="cont-upload-file">
+          <!-- <UploadFile :model-jsonsource="jsonsource"  @update:model-jsonsource="newValue => jsonsource = newValue"></UploadFile> -->
+          <UploadFile v-model:model-jsonsource="jsonsource"></UploadFile>
+          <span class="close-upload" @click="mostrarUpload = !mostrarUpload"></span>
+        </div>
+      </Transition>
     </div>
     <div class="container">
       <div class="row">
@@ -104,217 +107,246 @@ export default {
                 .catch((e) => console.error(e));
         }
     },
-    components: { UploadFile }
+    components: { UploadFile },
+    watch: {
+      // watching top-level property
+      jsonsource: {
+        handler(val) {
+          console.log('jsonsource changed: ' + val)
+          if (val && val.constructor === Array)
+          {
+            console.log("jsonsource handler arrived")
+            this.jsonsourceshow = [...val]
+            this.mostrarUpload = false
+            this.filter()
+          }
+        },
+        deep: true
+      }
+    }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 
-/**
-Upload file
-*/
-.close-upload {
-  position: absolute;
-  right: calc(30% - 45px);
-  width: 45px;
-  height: 45px;
-  background: #42b983;
-  transition: all ease .4s;
-  border-radius: 50%;
-  top: calc(30% - 45px);
-  cursor: pointer;
+  /**
+  Upload file
+  */
+  .close-upload {
+    position: absolute;
+    right: calc(30% - 45px);
+    width: 45px;
+    height: 45px;
+    background: #42b983;
+    transition: all ease .4s;
+    border-radius: 50%;
+    top: calc(30% - 45px);
+    cursor: pointer;
 
-  &:after {
-    content: " ";
-    display: block;
-    width: 36px;
-    height: 2px;
-    position: relative;
-    background: #fff;
-    transform: rotate(45deg);
-    top: 20px;
-    right: -5px;
-  }
-
-  &::before {
-    content: " ";
-    display: block;
-    width: 36px;
-    height: 2px;
-    position: relative;
-    background: #fff;
-    transform: rotate(-45deg);
-    top: 22px;
-    right: -5px;
-  }
-
-  &:hover {
-    border-radius: 0;
-    background: #20583f;
-  }
-}
-.cont-upload-file {
-  position: fixed;
-  width: 100svw;
-  height: 100svh;
-  display: block;
-  top: 0;
-  background-color: rgb(231 231 231 / 94%);
-  overflow: hidden;
-  z-index: 10;
-}
-
-.btnUploadFile {
-  padding: 20px;
-  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-  font-size: large;
-  font-weight: 600;
-  background-color: #e4e8f3;
-  display: inline-block;
-  clear: both;
-  margin-bottom: 30px;
-}
-
-/** Others */
-.row {
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: row;
-  margin: 0 auto;
-  max-width: 600px;
-}
-.col-6 {
-  flex: 1 0 0%;
-  padding: 0 10px;
-  width: 100%;
-  max-width: 100%;
-}
-*::after, *::before {
-  box-sizing: border-box;
-}
-
-h3 {
-  margin: 40px 0 0;
-}
-
-.subtitle {
-  font-size: x-large;
-  position: relative;
-  margin: 20px auto 40px;
-
-}
-
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-  text-decoration: none;
-}
-.cont {
-  padding: 20px 40px;
-  text-align: left;
-
-  .item {
-    margin: 15px 0;
-
-    summary {
-      padding: 20px;
-      font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-      font-size: large;
-      font-weight: 600;
-      background-color: #e4e8f3;
+    &:after {
+      content: " ";
+      display: block;
+      width: 36px;
+      height: 2px;
+      position: relative;
+      background: #fff;
+      transform: rotate(45deg);
+      top: 20px;
+      right: -5px;
     }
 
-    summary.encontrado {
-    background-color: #9fd7be;
-  }
-    .body {
-      font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-      font-size: medium;
-      font-weight: normal;
-      margin-top: 1px solid #c0c0c0;
-      transition: all ease-in-out .5s;
+    &::before {
+      content: " ";
+      display: block;
+      width: 36px;
+      height: 2px;
+      position: relative;
+      background: #fff;
+      transform: rotate(-45deg);
+      top: 22px;
+      right: -5px;
+    }
 
-      span:not([class="ttle"]) {
-        display: block;
-        padding: 5px;
-        transition: all ease-in-out .5s;
+    &:hover {
+      border-radius: 0;
+      background: #20583f;
+    }
+  }
+  .cont-upload-file {
+    position: fixed;
+    width: 100svw;
+    height: 100svh;
+    display: block;
+    top: 0;
+    background-color: rgb(231 231 231 / 94%);
+    overflow: hidden;
+    z-index: 10;
+  }
+
+  .btnUploadFile {
+    padding: 20px;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: large;
+    font-weight: 600;
+    background-color: #e4e8f3;
+    display: inline-block;
+    clear: both;
+    margin-bottom: 30px;
+  }
+
+  /** Others */
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    margin: 0 auto;
+    max-width: 600px;
+  }
+  .col-6 {
+    flex: 1 0 0%;
+    padding: 0 10px;
+    width: 100%;
+    max-width: 100%;
+  }
+  *::after, *::before {
+    box-sizing: border-box;
+  }
+
+  h3 {
+    margin: 40px 0 0;
+  }
+
+  .subtitle {
+    font-size: x-large;
+    position: relative;
+    margin: 20px auto 40px;
+
+  }
+
+  ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  li {
+    display: inline-block;
+    margin: 0 10px;
+  }
+  a {
+    color: #42b983;
+    text-decoration: none;
+  }
+  .cont {
+    padding: 20px 40px;
+    text-align: left;
+
+    .item {
+      margin: 15px 0;
+
+      summary {
+        padding: 20px;
+        font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+        font-size: large;
         font-weight: 600;
-        color: rgb(82, 82, 82);
-        .ttle {
+        background-color: #e4e8f3;
+      }
+
+      summary.encontrado {
+      background-color: #9fd7be;
+    }
+      .body {
+        font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+        font-size: medium;
+        font-weight: normal;
+        margin-top: 1px solid #c0c0c0;
+        transition: all ease-in-out .5s;
+
+        span:not([class="ttle"]) {
+          display: block;
+          padding: 5px;
+          transition: all ease-in-out .5s;
+          font-weight: 600;
           color: rgb(82, 82, 82);
-          margin-right: 5px;
-          font-weight: normal;
+          .ttle {
+            color: rgb(82, 82, 82);
+            margin-right: 5px;
+            font-weight: normal;
+          }
+        }
+
+        
+        span:not([class="ttle"]):hover {
+          background: #e6e6e6;
         }
       }
-
-      
-      span:not([class="ttle"]):hover {
-        background: #e6e6e6;
-      }
     }
   }
-}
 
 
 
-details summary  {
-  margin-bottom: -10px; /* for more prominent move */
-  transition: margin 150ms ease-out;
-}
+  details summary  {
+    margin-bottom: -10px; /* for more prominent move */
+    transition: margin 150ms ease-out;
+  }
 
-details[open] summary {
-  margin-bottom: 5px;
-}
+  details[open] summary {
+    margin-bottom: 5px;
+  }
 
-details[open] summary ~ * {
-  /* animation: sweep .5s ease-in-out; */
-  margin-bottom: 0px;
-}
-
-@keyframes sweep {
-  0%    {opacity: 0; margin-left: -10px}
-  100%  {opacity: 1; margin-left: 0px}
-}
-
-.selstyle {
-  position: relative;
-  margin: 5px 0;
-}
-
-.selstyle select {
-  background-color: #42b983;
-  color: white;
-  padding: 12px 16px 12px;
-  width: 250px;
-  border: none;
-  font-size: 20px;
-  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
-  -webkit-appearance: button;
-  appearance: button;
-  outline: none;
-}
+  details[open] summary ~ * {
+    /* animation: sweep .5s ease-in-out; */
+    margin-bottom: 0px;
+  }
 
 
-.selstyle:hover::before {
-  color: rgba(255, 255, 255, 0.6);
-  background-color: rgba(255, 255, 255, 0.2);
-}
+  .selstyle {
+    position: relative;
+    margin: 5px 0;
+  }
 
-.selstyle select option {
-  padding: 30px;
-  border-radius: 0;
-}
+  .selstyle select {
+    background-color: #42b983;
+    color: white;
+    padding: 12px 16px 12px;
+    width: 250px;
+    border: none;
+    font-size: 20px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+    -webkit-appearance: button;
+    appearance: button;
+    outline: none;
+  }
 
-.mt-4 {
-  margin-top: 60px;
-}
 
+  .selstyle:hover::before {
+    color: rgba(255, 255, 255, 0.6);
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .selstyle select option {
+    padding: 30px;
+    border-radius: 0;
+  }
+
+  .mt-4 {
+    margin-top: 60px;
+  }
+  
+  @keyframes sweep {
+    0%    {opacity: 0; margin-left: -10px}
+    100%  {opacity: 1; margin-left: 0px}
+  }
+
+</style>
+
+<style>
+  .v-enter-active,
+  .v-leave-active {
+    transition: opacity 0.4s ease;
+  }
+
+  .v-enter-from,
+  .v-leave-to {
+    opacity: 0;
+  }
 </style>

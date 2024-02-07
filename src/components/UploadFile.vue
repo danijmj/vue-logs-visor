@@ -3,7 +3,7 @@
     Suelta aquí los archivos
     <label for="fileInput" id="clickHere">
       O seleccione aquí
-      <input type="file" name="file" id="fileInput" v-on:change="load()"/>
+      <input type="file" name="file" id="fileInput" v-on:change="loadFile($event.target.value)"/>
     </label>
   </div>
 </template>
@@ -12,7 +12,7 @@
 export default {
   name: 'upload-file',
   props: {
-    dataArray: Array
+    modelJsonsource: Array
   },
   data() {
       return {
@@ -26,11 +26,49 @@ export default {
       }
   },
   mounted() {
+    this.fileData = this.modelJsonsource
     this.dropContainer = document.getElementById("dropContainer")
     this.fileInput = document.getElementById("fileInput")
     this.load();
   },
+  emits: ['update:modelJsonsource'],
   methods: {
+    loadFile: function loadFile(file) {
+      console.log(file)
+    },
+    managmentFileData(items) {
+
+      const that = this
+
+      that.getFileText(items).then(text => {
+
+        text = text.trim()
+        // Remove the las ','
+        if (text.endsWith(','))
+        {
+          let posLastCom = text.lastIndexOf(',')
+          text = text.substring(0, posLastCom)
+        }
+
+        // Add the brackets if don't have
+        if (!text.startsWith('[') && !text.endsWith(']'))
+        {
+          text = `[${text}]`
+        }
+
+        that.checkIfFileJsonIsValid(text, (json) => {
+
+          that.fileData = json
+          that.$emit('update:modelJsonsource', that.fileData)
+          alert("Texto leído correctamente")
+          // that.jsonsource = JSON.parse(text)
+          
+        }, (error, json) => {console.log(error, json)} )
+      }, (error) => {console.log(error)})
+    },
+    /**
+     * Method that chapture the dropzone file
+     */
     async load() 
     {
       this.dropContainer.ondragover = this.dropContainer.ondragenter = function(evt) {
@@ -50,14 +88,10 @@ export default {
         {
           return;
         }
-
+        
         dT.items.add(evt.dataTransfer.files[0]);
 
-        let text = that.getFileText(dT.items)
-        if (that.checkIfFileJsonIsValid(text))
-        {
-          // that.dataArray = JSON.parse(text)
-        }
+        that.managmentFileData(dT.items)
 
         /* if (evt.dataTransfer.files && evt.dataTransfer.files.constructor == Array && evt.dataTransfer.files.length > 2)
         {
@@ -68,75 +102,105 @@ export default {
         evt.preventDefault();
       };
     },
-    checkIfFileJsonIsValid: function checkIfFileJsonIsValid(text) { 
+    /**
+     * 
+     * @param {*} text 
+     * @param {*} callback 
+     * @param {*} error 
+     */
+    checkIfFileJsonIsValid: function checkIfFileJsonIsValid(text, callback = () => {return void(0)}, error = () => {return void(0)}) { 
+      let json = null;
       
-      if (!text.startsWith('[') && text.endsWith(']'))
-      {
-        text = `[${text}]`
-      }
       try {
-        const json = JSON.parse(text)
-        if (json.constructor === Array)
-        {
-          json.forEach(e => {
-            if (
-              !Object.hasOwn(e, "type") || 
-              !Object.hasOwn(e, "url") || 
-              !Object.hasOwn(e, "finded") || 
-              !Object.hasOwn(e, "titn")
-            ){
-              alert("El json no tiene el formato adecuado")
-              return false
-            }
-          })
-          return true
+        // json = JSON.stringify(text);
+        console.log(text)
+        json = JSON.parse(text)
+        
+        let isTrue = true
+
+        Object.values(json).forEach(e => {
+          if (
+            !Object.hasOwn(e, "type") || 
+            !Object.hasOwn(e, "url") || 
+            !Object.hasOwn(e, "finded") || 
+            !Object.hasOwn(e, "titn")
+          ){
+            // console.log("El json no tiene el formato adecuado")
+            isTrue = false
+          }
+        })
+        if (!isTrue) {
+          error("Json no válido", json)
+          alert("Json no válido") 
         }
-      } catch (e) { alert("Json no válido: " + e) }
+        callback(json)
+        return isTrue
+        
+      } catch (e) { 
+        error("Json no válido: " + e, json)
+        alert("Json no válido: " + e) 
+      }
+      error("Json no válido", json)
       return false
     },
+    /**
+     * 
+     * @param {*} items 
+     */
     getFileText: function getFileText(items) {
-      // The necesary consts
-      const that = this
-      // We inizialize the FileReader object
-      const reader = new FileReader();
-      
-      Object.values(items).forEach(it => {
 
-        if (!that.listPossibleTypes.includes(it.type))
-        {
-          throw new Error("Tipo de archivo no permitido");
-        }
-        try {
-          // We convert the DataTranfer/File object to a File object
-          const file = it.getAsFile()
-          // We a FileRead object to read the text
-          // The file will start to read (Async)
-          reader.readAsText(file);
-
-        } catch(error) {
-          console.log("error: " + error)
-        }
-        // let textFile = it.prototype.getAsString()
+      const promise = new Promise((resolve, reject) => {
         
+        // The necesary consts
+        const that = this
+        // We inizialize the FileReader object
+        const reader = new FileReader();
+        
+        Object.values(items).forEach(it => {
+
+          if (!that.listPossibleTypes.includes(it.type))
+          {
+            console.log("Tipo de archivo no permitido")
+            alert("Tipo de archivo no permitido")
+            reject("Tipo de archivo no permitido")
+          }
+          try {
+            // We convert the DataTranfer/File object to a File object
+            const file = it.getAsFile()
+            // We a FileRead object to read the text
+            // The file will start to read (Async)
+            reader.readAsText(file);
+
+          } catch(error) {
+            console.log("error: " + error)
+            alert("error: " + error)
+            reject("error: " + error)
+          }
+          // let textFile = it.prototype.getAsString()
+          
+        });
+
+        // Event handle when the file has been rode
+        reader.addEventListener(
+          "load",
+          () => {
+            // this will then display a text file
+            // content.innerText = reader.result;
+            console.log("Texto leído: " + reader.result)
+            let text = reader.result
+            if (!text) {
+              alert("Error, the file is empty")
+              console.log("Error, the file is empty")
+              reject("Error, el archivo está vacío")
+            }
+            resolve(text)
+
+          },
+          false,
+        );
       });
 
-      // Event handle when the file has been rode
-      reader.addEventListener(
-        "load",
-        () => {
-          // this will then display a text file
-          // content.innerText = reader.result;
-          console.log("Texto leído: " + reader.result)
-          let text = reader.result
-          if (!text) {
-            alert("Error, the file is empty")
-            throw "Error, the file is empty"
-          }
-          return text
-
-        },
-        false,
-      );
+      return promise
 
     }
   },
@@ -163,7 +227,7 @@ export default {
     color: rgb(0 0 0);
     transition: all ease-in-out .4s;
 
-    &::backdrop
+    &::drop
     {
       border: 2px dashed #42b983;
     }
