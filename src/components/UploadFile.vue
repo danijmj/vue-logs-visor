@@ -3,7 +3,7 @@
     Suelta aquí los archivos
     <label for="fileInput" id="clickHere">
       O seleccione aquí
-      <input type="file" name="file" id="fileInput" v-on:change="loadFile($event.target.value)"/>
+      <input type="file" name="file" id="fileInput" v-on:change="loadFile($event.target.files)"/>
     </label>
   </div>
 </template>
@@ -33,32 +33,51 @@ export default {
   },
   emits: ['update:modelJsonsource'],
   methods: {
-    loadFile: function loadFile(file) {
-      console.log(file)
+    /**
+     * Method to load a file with the imput type file
+     * @param {Files(s)} files, List of object with the imput files loaded with the input
+     */
+    loadFile: function loadFile(files) {
+
+      // Be generate the DataTransfer object
+      const dT = new DataTransfer();
+      // We add the file(only the first item) into the object
+      dT.items.add(files[0]);
+      // Call the method to managment the file
+      this.managmentFileData(dT.items)
+
     },
+    /**
+     * Method that start the managment of the upload file,
+     * We have got the files, now we're goint to managment and read the file 
+     * @param {DataTransfer.items} items, List (but only one) of files to load 
+     */
     managmentFileData(items) {
 
       const that = this
-
+      // We call the method that load the text
       that.getFileText(items).then(text => {
 
+        // Remove the empty first, and last, empty spaces
         text = text.trim()
-        // Remove the las ','
+        // Remove the last ',' character
         if (text.endsWith(','))
         {
           let posLastCom = text.lastIndexOf(',')
           text = text.substring(0, posLastCom)
         }
 
-        // Add the brackets if don't have
+        // Add the brackets if it don't have
         if (!text.startsWith('[') && !text.endsWith(']'))
         {
           text = `[${text}]`
         }
-
+        // We convert (in the method) the text to a json object
+        // After, we emit the change to the parent component
         that.checkIfFileJsonIsValid(text, (json) => {
 
           that.fileData = json
+          // Emit the change
           that.$emit('update:modelJsonsource', that.fileData)
           alert("Texto leído correctamente")
           // that.jsonsource = JSON.parse(text)
@@ -67,7 +86,7 @@ export default {
       }, (error) => {console.log(error)})
     },
     /**
-     * Method that chapture the dropzone file
+     * Async Method that chapture the dropzone file
      */
     async load() 
     {
@@ -103,21 +122,20 @@ export default {
       };
     },
     /**
-     * 
-     * @param {*} text 
-     * @param {*} callback 
-     * @param {*} error 
+     * Method that parse the json text into a json object and check if the json is a valid log  
+     * @param {String} text, text with the (expected) json text
+     * @param {Function} callback, callback to execute if the value is correct
+     * @param {Function} error, callback to execute if the value is incorrect
      */
     checkIfFileJsonIsValid: function checkIfFileJsonIsValid(text, callback = () => {return void(0)}, error = () => {return void(0)}) { 
       let json = null;
       
       try {
-        // json = JSON.stringify(text);
-        console.log(text)
         json = JSON.parse(text)
         
         let isTrue = true
 
+        // Check if the object items has the structure
         Object.values(json).forEach(e => {
           if (
             !Object.hasOwn(e, "type") || 
@@ -125,7 +143,6 @@ export default {
             !Object.hasOwn(e, "finded") || 
             !Object.hasOwn(e, "titn")
           ){
-            // console.log("El json no tiene el formato adecuado")
             isTrue = false
           }
         })
@@ -144,8 +161,8 @@ export default {
       return false
     },
     /**
-     * 
-     * @param {*} items 
+     * Methdo to load the files
+     * @param {DataTransfer.items} items, List (but only one) of files to load 
      */
     getFileText: function getFileText(items) {
 
@@ -186,11 +203,11 @@ export default {
           () => {
             // this will then display a text file
             // content.innerText = reader.result;
-            console.log("Texto leído: " + reader.result)
+            console.log("Texto leído")
             let text = reader.result
             if (!text) {
-              alert("Error, the file is empty")
-              console.log("Error, the file is empty")
+              alert("Error, el archivo está vacío")
+              console.log("Error, el archivo está vacío")
               reject("Error, el archivo está vacío")
             }
             resolve(text)
@@ -243,6 +260,17 @@ export default {
     top: 0px;
     /*Important This is only comment out for demonstration purposes. */
     opacity:0; 
+  }
+
+  @media screen and ( max-width: 750px ) {
+    #dropContainer {
+      width: 80%;
+      height: 80%;
+      left: 10%;
+      top: 10%;
+      transform: none;
+      font-size: 20px;
+    }
   }
 
   /*Important*/

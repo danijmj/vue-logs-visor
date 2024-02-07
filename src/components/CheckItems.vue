@@ -88,34 +88,42 @@ export default {
         this.load();
     },
     methods: {
-        filter: function filter() {
-            if (this.jsonsource == null)
-                return;
-            this.jsonsourceshow = [...this.jsonsource];
-            if (this.selectedtyperesource != -1) {
-                console.log("this.jsonsource: " + this.jsonsource);
-                this.jsonsourceshow = this.jsonsourceshow.filter(e => e.type === this.selectedtyperesource);
-            }
-            if (this.selectedstate != -1) {
-                this.jsonsourceshow = this.jsonsourceshow.filter(e => e.finded === this.selectedstate);
-            }
-        },
-        async load() {
-            await fetch("/sources.json")
-                .then((res) => this.jsonsource = res.json())
-                .then(res => { this.jsonsource = res; this.jsonsourceshow = res; })
-                .catch((e) => console.error(e));
+      /**
+       * Method to filter the data
+       */
+      filter: function filter() {
+        // We check firt if the json has data
+        if (this.jsonsource == null) { return; }
+        // Load the original json data into the copy
+        this.jsonsourceshow = [...this.jsonsource];
+        // We filter the data
+        if (this.selectedtyperesource != -1) {
+          // console.log("this.jsonsource: " + this.jsonsource);
+          this.jsonsourceshow = this.jsonsourceshow.filter(e => e.type === this.selectedtyperesource);
         }
+        if (this.selectedstate != -1) {
+          this.jsonsourceshow = this.jsonsourceshow.filter(e => e.finded === this.selectedstate);
+        }
+      },
+      /**
+       * Async method to load the current source file
+       */
+      async load() {
+        await fetch("/sources.json")
+          .then((res) => this.jsonsource = res.json())
+          .then(res => { this.jsonsource = res; this.jsonsourceshow = res; })
+          .catch((e) => console.error(e));
+      }
     },
     components: { UploadFile },
     watch: {
-      // watching top-level property
+      // watching top-level property is changed
       jsonsource: {
         handler(val) {
-          console.log('jsonsource changed: ' + val)
+          // console.log('jsonsource changed')
           if (val && val.constructor === Array)
           {
-            console.log("jsonsource handler arrived")
+            // console.log("jsonsource handler arrived")
             this.jsonsourceshow = [...val]
             this.mostrarUpload = false
             this.filter()
@@ -173,6 +181,27 @@ export default {
       background: #20583f;
     }
   }
+  @media screen and ( max-width: 750px ) {
+    .close-upload {
+      position: absolute;
+      right: calc(10% - 20px);
+      top: calc(10% - 20px);
+      transform: scale(.5);
+
+      &::after {
+        transform: scale(.5);
+      }
+
+      &::before {
+        transform: scale(.5);
+      }
+
+      &:hover {
+        border-radius: 0;
+        background: #20583f;
+      }
+    }
+  }
   .cont-upload-file {
     position: fixed;
     width: 100svw;
@@ -194,6 +223,7 @@ export default {
     clear: both;
     margin-bottom: 30px;
   }
+
 
   /** Others */
   .row {
