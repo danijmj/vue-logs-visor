@@ -1,7 +1,7 @@
 <template>
-  <div id="dropContainer">
+  <div id="dropContainer" class="dropzone">
     Suelta aquí los archivos
-    <label for="fileInput" id="clickHere">
+    <label for="fileInput" id="clickHere" class="labelClickHere">
       O seleccione aquí
       <input type="file" name="file" id="fileInput" v-on:change="loadFile($event.target.files)"/>
     </label>
@@ -84,6 +84,9 @@ export default {
           
         }, (error, json) => {console.log(error, json)} )
       }, (error) => {console.log(error)})
+
+      // Remove the class 'dragover' ever
+      this.dropContainer.classList.remove('dragover')
     },
     /**
      * Async Method that chapture the dropzone file
@@ -120,6 +123,22 @@ export default {
 
         evt.preventDefault();
       };
+
+      // Events to detect if a file is over the area
+      this.dropContainer.addEventListener("dragenter", (event) => {
+        // highlight potential drop target when the draggable element enters it
+        if (event.target.classList.contains("dropzone")) {
+          event.target.classList.add("dragover");
+        }
+      });
+
+      this.dropContainer.addEventListener("dragleave", (event) => {
+        // reset background of potential drop target when the draggable element leaves it
+        if (event.target.classList.contains("dropzone")) {
+          event.target.classList.remove("dragover");
+        }
+      });
+
     },
     /**
      * Method that parse the json text into a json object and check if the json is a valid log  
@@ -227,7 +246,7 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 
-  #dropContainer {
+  .dropzone {
     width: 40%;
     height: 40%;
     left: 50%;
@@ -242,16 +261,20 @@ export default {
     line-height: 180px;
     font-size: 20px;
     color: rgb(0 0 0);
-    transition: all ease-in-out .4s;
-
-    &::drop
-    {
-      border: 2px dashed #42b983;
-    }
+    transition: border ease-in-out .4s, background-color ease-in-out .4s,;
 
   }
+  .dropzone.dragover
+  {
+    border: 5px solid #42b983;
+    /* transform: translate(-50%, -50%) scale(1.1, 1.1); */
+    /* border-radius: 0; */
+    background-color: rgb(233, 233, 233);
+  }
 
-  #dropContainer input {
+  
+
+  .dropzone input {
     /*Important*/
     position: absolute;
     /*Important*/
@@ -263,7 +286,7 @@ export default {
   }
 
   @media screen and ( max-width: 750px ) {
-    #dropContainer {
+    .dropzone {
       width: 80%;
       height: 80%;
       left: 10%;
@@ -274,13 +297,13 @@ export default {
   }
 
   /*Important*/
-  #dropContainer.mouse-over {
+  .dropzone.mouse-over {
     border: 2px dashed rgba(0,0,0,.5);
     color: rgba(0,0,0,.5);
   }
 
   /*If you dont want the button*/
-  #clickHere {
+  .labelClickHere {
     position: absolute;
     cursor: pointer;
     left: 50%;
@@ -300,7 +323,7 @@ export default {
     cursor: pointer;
   }
 
-  #clickHere:hover {
+  .labelClickHere:hover {
     background-color: #20583f;
   }
 
