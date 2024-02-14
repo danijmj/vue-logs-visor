@@ -261,7 +261,7 @@ export default {
     line-height: 180px;
     font-size: 20px;
     color: rgb(0 0 0);
-    transition: border ease-in-out .4s, background-color ease-in-out .4s,;
+    transition: all ease-in-out .2s;
 
   }
   .dropzone.dragover

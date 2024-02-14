@@ -64,8 +64,8 @@ import UploadFile from './UploadFile.vue';
 export default {
     name: 'check-items',
     props: {
-        msg: String,
-        subMsg: String
+      msg: String,
+      subMsg: String
     },
     data() {
         return {
@@ -85,9 +85,26 @@ export default {
         };
     },
     mounted() {
-        this.load();
+      // Load the file
+      this.load();
+      // Check if the user has clicked outside 
+      this.checkOutsideUploadFileArea()
     },
     methods: {
+      /**
+       * Method to manage the click event to check if the user has clicked outside of the UploadFile area
+       */
+       checkOutsideUploadFileArea () {
+        const that = this;
+        let body = document.querySelector('body')
+        let item = document.querySelector('.cont-upload-file')
+        let btn = document.querySelector('.btnUploadFile')
+        body.addEventListener('click', (ev) => {
+          if (ev.target == item && ev.target != btn) {
+            that.mostrarUpload = false
+          }
+        });
+      },
       /**
        * Method to filter the data
        */
