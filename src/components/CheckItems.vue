@@ -68,21 +68,21 @@ export default {
       subMsg: String
     },
     data() {
-        return {
-            jsonsource: [],
-            jsonsourceshow: [],
-            selectedtyperesource: -1,
-            selectedstate: -1,
-            types: {
-                0: "Pdf",
-                1: "Imagen"
-            },
-            encontradoArr: {
-                false: "NO",
-                true: "SI"
-            },
-            mostrarUpload: false
-        };
+      return {
+        jsonsource: [],
+        jsonsourceshow: [],
+        selectedtyperesource: -1,
+        selectedstate: -1,
+        types: {
+          0: "Pdf",
+          1: "Imagen"
+        },
+        encontradoArr: {
+          false: "NO",
+          true: "SI"
+        },
+        mostrarUpload: false
+      };
     },
     mounted() {
       // Load the file
