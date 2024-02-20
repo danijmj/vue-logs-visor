@@ -2,7 +2,7 @@
   <div class="hello">
     <h1 class="subtitle">{{ msg }}</h1>
     <div class="container">
-      <a class="btnUploadFile" href="javascript:void(0)" @click="mostrarUpload = !mostrarUpload">
+      <a class="btn btnUploadFile" href="javascript:void(0)" @click="mostrarUpload = !mostrarUpload">
         Leer nuevo archivo de logs (formato json)
       </a>
       <Transition>
@@ -40,7 +40,7 @@
     </h2>
     <div>
       <div class="cont" v-if="jsonsourceshow != null" >
-        <div class="item" :key="index" v-for="(item, index) in jsonsourceshow">
+        <div class="item" :key="index" v-for="(item, index) in jsonsourceshow.slice(0, showNumItems)">
           <details>
             <summary :class="{ encontrado: item.finded }">
               <span class="type">{{ types[item.type] }}</span>, {{ item.titn }} 
@@ -52,6 +52,9 @@
               <span class="type"><span class="ttle">TIPO:</span> {{ types[item.type] }}</span>
             </p>
           </details>
+        </div>
+        <div class="text-center">
+          <button @click="showNumItems += showNumItemsIncrement" class="btn btn-loadmore">Cargar más</button>
         </div>
       </div>
     </div>
@@ -81,7 +84,9 @@ export default {
           false: "NO",
           true: "SI"
         },
-        mostrarUpload: false
+        mostrarUpload: false,
+        showNumItemsIncrement: 40,
+        showNumItems: 40
       };
     },
     mounted() {
@@ -109,6 +114,7 @@ export default {
        * Method to filter the data
        */
       filter: function filter() {
+        this.showNumItems = this.showNumItemsIncrement
         // We check firt if the json has data
         if (this.jsonsource == null) { return; }
         // Load the original json data into the copy
@@ -121,6 +127,7 @@ export default {
         if (this.selectedstate != -1) {
           this.jsonsourceshow = this.jsonsourceshow.filter(e => e.finded === this.selectedstate);
         }
+
       },
       /**
        * Async method to load the current source file
@@ -230,7 +237,7 @@ export default {
     z-index: 10;
   }
 
-  .btnUploadFile {
+  .btn {
     padding: 20px;
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     font-size: large;
@@ -238,8 +245,25 @@ export default {
     background-color: #e4e8f3;
     display: inline-block;
     clear: both;
+    border: 1px solid transparent;
+    color: #42b983;
+    transition: all ease-in-out .4s;
+    cursor: pointer;
+    &:hover {
+      color: #20583f;
+      border: 1px solid #20583f;
+      background-color: #c3c6cf;
+    }
+  }
+
+  .btn-loadmore {
+    margin: 30px 0;
+  }
+
+  .btnUploadFile {
     margin-bottom: 30px;
   }
+  
 
 
   /** Others */
@@ -387,6 +411,9 @@ export default {
 </style>
 
 <style>
+  .text-center {
+    text-align: center;
+  }
   .v-enter-active,
   .v-leave-active {
     transition: opacity 0.4s ease;
