@@ -1,8 +1,8 @@
 <template>
   <div id="dropContainer" class="dropzone">
-    Suelta aquí los archivos
+    Drop here the files
     <label for="fileInput" id="clickHere" class="labelClickHere">
-      O seleccione aquí
+      Or click here
       <input type="file" name="file" id="fileInput" v-on:change="loadFile($event.target.files)"/>
     </label>
   </div>
@@ -22,6 +22,7 @@ export default {
         listPossibleTypes: [
           "text/plain",
           "text/json",
+          "application/json"
         ]
       }
   },
@@ -114,12 +115,6 @@ export default {
         dT.items.add(evt.dataTransfer.files[0]);
 
         that.managmentFileData(dT.items)
-
-        /* if (evt.dataTransfer.files && evt.dataTransfer.files.constructor == Array && evt.dataTransfer.files.length > 2)
-        {
-          dT.items.add(evt.dataTransfer.files[3]);
-        } */
-        /* this.fileInput.files = dT.files; */
 
         evt.preventDefault();
       };

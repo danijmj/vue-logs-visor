@@ -3,7 +3,7 @@
     <h1 class="subtitle">{{ msg }}</h1>
     <div class="container">
       <a class="btn btnUploadFile" href="javascript:void(0)" @click="mostrarUpload = !mostrarUpload">
-        Leer nuevo archivo de logs (formato json)
+        Read new log file (json format)
       </a>
       <Transition>
         <div v-show="mostrarUpload" class="cont-upload-file">
@@ -18,25 +18,25 @@
         <div class="col-6 ">
           <div class="selstyle">
             <select @change="filter()" class="" v-model="selectedtyperesource" id="selecttyperesource">
-              <option :value="-1">Tipo de elementos</option>
+              <option :value="-1">Element type</option>
               <option :value="0">Pdf</option>
-              <option :value="1">Imagen</option>
+              <option :value="1">Image</option>
             </select>
           </div>
         </div>
         <div class="col-6">
           <div class="selstyle">
           <select @change="filter()" class="" v-model="selectedstate" id="selectedstate">
-            <option :value="-1">Estado del recurso</option>
-            <option :value="true">Correcto</option>
-            <option :value="false">Incorrecto</option>
+            <option :value="-1">Resource state</option>
+            <option :value="true">Correct</option>
+            <option :value="false">Incorrect</option>
           </select>
         </div>
         </div>
       </div>
     </div>
     <h2 class="mt-4">
-      Resultados ({{ jsonsourceshow.length }})
+      Results ({{ jsonsourceshow.length }})
     </h2>
     <div>
       <div class="cont" v-if="jsonsourceshow != null" >
@@ -47,14 +47,14 @@
             </summary>            
             <p class="body">
               <span class="titn"><span class="ttle">TITN:</span> <a :href="'https://opac.inap.es/opac/abnetcl.exe?TITN=' + item.titn" target="_blank">{{ item.titn }}</a> </span>
-              <span class="finded"><span class="ttle">RECURSO ENCONTRADO:</span> {{ encontradoArr[item.finded] }}</span>
+              <span class="finded"><span class="ttle">RESOURCE FOUND:</span> {{ encontradoArr[item.finded] }}</span>
               <span class="url"><span class="ttle">URL:</span> <a :href="item.url" target="_blank">{{ item.url }}</a></span>
-              <span class="type"><span class="ttle">TIPO:</span> {{ types[item.type] }}</span>
+              <span class="type"><span class="ttle">TYPE:</span> {{ types[item.type] }}</span>
             </p>
           </details>
         </div>
         <div class="text-center">
-          <button @click="showNumItems += showNumItemsIncrement" class="btn btn-loadmore">Cargar más</button>
+          <button @click="showNumItems += showNumItemsIncrement" class="btn btn-loadmore">Load more</button>
         </div>
       </div>
     </div>
@@ -78,11 +78,11 @@ export default {
         selectedstate: -1,
         types: {
           0: "Pdf",
-          1: "Imagen"
+          1: "Image"
         },
         encontradoArr: {
           false: "NO",
-          true: "SI"
+          true: "Yes"
         },
         mostrarUpload: false,
         showNumItemsIncrement: 40,
@@ -121,7 +121,6 @@ export default {
         this.jsonsourceshow = [...this.jsonsource];
         // We filter the data
         if (this.selectedtyperesource != -1) {
-          // console.log("this.jsonsource: " + this.jsonsource);
           this.jsonsourceshow = this.jsonsourceshow.filter(e => e.type === this.selectedtyperesource);
         }
         if (this.selectedstate != -1) {
@@ -144,10 +143,8 @@ export default {
       // watching top-level property is changed
       jsonsource: {
         handler(val) {
-          // console.log('jsonsource changed')
           if (val && val.constructor === Array)
           {
-            // console.log("jsonsource handler arrived")
             this.jsonsourceshow = [...val]
             this.mostrarUpload = false
             this.filter()
