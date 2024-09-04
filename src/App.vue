@@ -1,6 +1,6 @@
 <template>
-  <img alt="Logs de AbsysNet" src="./assets/e-log.png" width="300px">
-  <CheckItems msg="Visor de los archivos obtenidos, y su estado, en AbsysNet"/>
+  <img alt="Logs" src="./assets/e-log.png" width="300px">
+  <CheckItems msg="Visor for the getted files log "/>
 </template>
 
 <script>
